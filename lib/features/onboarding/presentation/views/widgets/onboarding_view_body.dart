@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../../../core/utils/app_Colors.dart';
+import '../../../../auth/presentation/views/login_view.dart';
 import 'onboarding_page_view.dart';
 
 class OnBoardingViewBody extends StatefulWidget {
@@ -35,6 +36,7 @@ class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
@@ -43,7 +45,7 @@ class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
           bottom: 50.h,
           left: 50.w,
           right: 24.w,
-          child: Row(
+          child: Column(
             children: [
               SmoothPageIndicator(
                 controller: pageController,
@@ -58,31 +60,34 @@ class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
                   dotDecoration: DotDecoration(
                     width: 8.w,
                     height: 8.h,
-                    color: AppColors.primaryColor.withOpacity(0.3),
+                    color: AppColors.primaryColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
-              const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  if (currentPage < 2) {
-                    pageController.nextPage(
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                    );
-                  } else {
-                    // Navigator.pushReplacementNamed(context, LoginView.routeName);
-                  }
-                },
-                child: Container(
-                  width: 50.w,
-                  height: 50.w,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
+              SizedBox(height: height/10,),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  onTap: () {
+                    if (currentPage < 2) {
+                      pageController.nextPage(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                      );
+                    } else {
+                      Navigator.pushReplacementNamed(context, LoginView.routeName);
+                    }
+                  },
+                  child: Container(
+                    width: 50.w,
+                    height: 50.w,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: const Icon(Icons.arrow_forward, color: Colors.black),
                   ),
-                  child: const Icon(Icons.arrow_forward, color: Colors.black),
                 ),
               ),
             ],
