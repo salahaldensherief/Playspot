@@ -12,30 +12,15 @@ import 'package:playspot/features/auth/presentation/cubits/auth_state.dart';
 import 'package:playspot/features/auth/presentation/views/login_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class VerifyOtpView extends StatefulWidget {
-  const VerifyOtpView({super.key});
+class ResetPasswordOtp extends StatefulWidget {
+  const ResetPasswordOtp({super.key});
   static const routeName = 'verifyOtpView';
 
   @override
-  State<VerifyOtpView> createState() => _VerifyOtpViewState();
+  State<ResetPasswordOtp> createState() => _ResetPasswordOtpState();
 }
 
-class _VerifyOtpViewState extends State<VerifyOtpView> {
-  String? phone;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPhone();
-  }
-
-  Future<void> _loadPhone() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      phone = prefs.getString('phone') ?? '';
-    });
-  }
-
+class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<AuthCubit>();
@@ -52,7 +37,7 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
         child: BlocConsumer<AuthCubit, AuthState>(
           listener: (context, state) async {
             if (!mounted) return;
-            if (state is AuthOtpVerified) {
+            if (state is AuthOtpSent) {
               Navigator.pushReplacementNamed(context, LoginView.routeName);
             } else if (state is AuthError) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -76,7 +61,7 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
                 PinCodeTextField(
                   appContext: context,
                   length: 4,
-                  controller: cubit.otpCode,
+                  controller: cubit.forgetPasswordPhone,
                   keyboardType: TextInputType.number,
                   cursorColor: AppColors.secondaryColor,
                   animationType: AnimationType.fade,
@@ -101,19 +86,18 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
                 ),
                 SizedBox(height: screenHeight * 0.05),
                 state is AuthLoading
-                    ? const CircularProgressIndicator(color: AppColors.secondaryColor)
+                    ? const CircularProgressIndicator(
+                        color: AppColors.secondaryColor,
+                      )
                     : CustomButton(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    final phone = prefs.getString('phone') ?? '';
-                    final code = cubit.otpCode.text.trim();
-                    cubit.verifyOtp(phone: phone, code: code);
-                  },
-                  text: 'Verify',
-                  color: AppColors.secondaryColor,
-                  colorSide: AppColors.secondaryColor,
-                  fontColor: AppColors.primaryColor,
-                ),
+                        onPressed: () {
+                          cubit.forgetPasswordPhone.text;
+                        },
+                        text: 'Verify',
+                        color: AppColors.secondaryColor,
+                        colorSide: AppColors.secondaryColor,
+                        fontColor: AppColors.primaryColor,
+                      ),
                 SizedBox(height: screenHeight * 0.05),
                 const ResendCodeWidget(),
               ],

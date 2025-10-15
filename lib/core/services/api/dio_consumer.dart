@@ -13,7 +13,7 @@ class DioConsumer extends ApiConsumer {
   final CookieJar cookieJar;
 
   DioConsumer({required this.dio, CookieJar? sharedCookieJar})
-      : cookieJar = sharedCookieJar ?? CookieJar() {
+    : cookieJar = sharedCookieJar ?? CookieJar() {
     dio.options.baseUrl = ApiEndPoint.baseUrl;
     dio.interceptors.add(CookieManager(cookieJar));
     dio.interceptors.add(ApiInterceptors());
@@ -27,7 +27,6 @@ class DioConsumer extends ApiConsumer {
         responseHeader: true,
       ),
     );
-
   }
   @override
   Future delete(
@@ -59,7 +58,7 @@ class DioConsumer extends ApiConsumer {
         data: data,
         queryParameters: queryParameters,
       );
-      return response.data;
+      return response;
     } on DioException catch (e) {
       handleDioExceptions(e);
     }
@@ -89,7 +88,7 @@ class DioConsumer extends ApiConsumer {
     Object? data,
 
     Map<String, dynamic>? queryParameters,
-        Options? options,
+    Options? options,
   }) async {
     try {
       final response = await dio.post(
@@ -97,7 +96,6 @@ class DioConsumer extends ApiConsumer {
         data: data,
         queryParameters: queryParameters,
         options: options,
-
       );
       return response.data;
     } on DioException catch (e) {
