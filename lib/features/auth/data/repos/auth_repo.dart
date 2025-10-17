@@ -20,8 +20,8 @@ abstract class AuthRepo {
     required String phone,
     required String newPassword,
   });
-  Future<Either<ServerException, OtpResponse>> sendOtp({
-    required String code,
+  Future<Either<ServerException, OtpResponse>> resendOtp({
+    required String phone,
   });
 
   Future<Either<ServerException, OtpResponse>> verifyOtp({

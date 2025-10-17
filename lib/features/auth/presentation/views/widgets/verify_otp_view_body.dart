@@ -1,14 +1,17 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:playspot/core/services/api/dio_consumer.dart';
 import 'package:playspot/core/utils/app_Colors.dart';
 import 'package:playspot/core/utils/textStyles.dart';
 import 'package:playspot/core/widgets/custom_app_bar.dart';
 import 'package:playspot/core/widgets/custom_button.dart';
 import 'package:playspot/core/widgets/resend_code_widget.dart';
-import 'package:playspot/features/auth/presentation/cubits/auth_cubit.dart';
-import 'package:playspot/features/auth/presentation/cubits/auth_state.dart';
+import 'package:playspot/features/auth/data/repos/auth_repo_impl.dart';
+import 'package:playspot/features/auth/presentation/cubits/resendOtp/resend_otp_cubit.dart';
+import 'package:playspot/features/auth/presentation/cubits/verifyOtp/verify_otp_cubit.dart';
 import 'package:playspot/features/auth/presentation/views/login_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,7 +41,7 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<AuthCubit>();
+    final cubit = context.read<VerifyOtpCubit>();
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -49,12 +52,20 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 24.w),
-        child: BlocConsumer<AuthCubit, AuthState>(
+        child: BlocConsumer<VerifyOtpCubit, VerifyOtpState>(
           listener: (context, state) async {
             if (!mounted) return;
-            if (state is AuthOtpVerified) {
+            if (state is VerifyOtpSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('OTP verified successfully, Let\`s login'),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(16),
+                ),
+              );
               Navigator.pushReplacementNamed(context, LoginView.routeName);
-            } else if (state is AuthError) {
+            } else if (state is VerifyOtpFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
@@ -91,31 +102,41 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
                     activeFillColor: AppColors.grayColor,
                     inactiveFillColor: AppColors.grayColor,
                     selectedFillColor: AppColors.grayColor,
-                    activeColor: AppColors.grayColor,
-                    inactiveColor: AppColors.grayColor,
-                    selectedColor: AppColors.grayColor,
-                    borderWidth: 0,
+                    activeColor: state is VerifyOtpFailure
+                        ? Colors.red
+                        : AppColors.grayColor,
+                    inactiveColor: state is VerifyOtpFailure
+                        ? Colors.red
+                        : AppColors.grayColor,
+                    selectedColor: state is VerifyOtpFailure
+                        ? Colors.red
+                        : AppColors.grayColor,
+                    borderWidth: 2,
                   ),
                   enableActiveFill: true,
                   onChanged: (_) {},
                 ),
                 SizedBox(height: screenHeight * 0.05),
-                state is AuthLoading
-                    ? const CircularProgressIndicator(color: AppColors.secondaryColor)
+                state is VerifyOtpLoading
+                    ? const CircularProgressIndicator(
+                        color: AppColors.secondaryColor,
+                      )
                     : CustomButton(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    final phone = prefs.getString('phone') ?? '';
-                    final code = cubit.otpCode.text.trim();
-                    cubit.verifyOtp(phone: phone, code: code);
-                  },
-                  text: 'Verify',
-                  color: AppColors.secondaryColor,
-                  colorSide: AppColors.secondaryColor,
-                  fontColor: AppColors.primaryColor,
-                ),
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          final phone = prefs.getString('phone') ?? '';
+                          final code = cubit.otpCode.text.trim();
+                          cubit.verifyOtp(phone: phone, code: code);
+                        },
+                        text: 'Verify',
+                        color: AppColors.secondaryColor,
+                        colorSide: AppColors.secondaryColor,
+                        fontColor: AppColors.primaryColor,
+                      ),
                 SizedBox(height: screenHeight * 0.05),
-                const ResendCodeWidget(),
+                 BlocProvider(
+                     create: (_) => ResendOtpCubit(AuthRepoImpl(DioConsumer(dio: Dio()))),
+                     child: ResendCodeWidget()),
               ],
             );
           },

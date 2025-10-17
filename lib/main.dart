@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
             fontFamily: 'ArbutusSlab'
           ),
           initialRoute: SplashView.routeName,
-          onGenerateRoute: onGenerateRoutes,
+          onGenerateRoute: AppRouter.onGenerateRoute,
         );
       },
     );

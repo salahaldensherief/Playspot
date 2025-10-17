@@ -5,8 +5,7 @@ import 'package:playspot/core/utils/app_Colors.dart';
 import 'package:playspot/core/widgets/custom_app_bar.dart';
 import 'package:playspot/core/widgets/custom_button.dart';
 import 'package:playspot/core/widgets/custom_text_field.dart';
-import 'package:playspot/features/auth/presentation/cubits/auth_cubit.dart';
-import 'package:playspot/features/auth/presentation/cubits/auth_state.dart';
+import 'package:playspot/features/auth/presentation/cubits/forgetPassword/forget_password_cubit.dart';
 import 'package:playspot/features/auth/presentation/views/widgets/reset_password_otp.dart';
 import 'package:playspot/features/auth/presentation/views/widgets/verify_otp_view_body.dart';
 
@@ -17,7 +16,7 @@ class ForgetPasswordViewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<AuthCubit>();
+    final cubit = context.read<ForgetPasswordCubit>();
     var screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -26,11 +25,11 @@ class ForgetPasswordViewBody extends StatelessWidget {
         showBack: true,
         title: 'Forget Password',
       ),
-      body: BlocConsumer<AuthCubit, AuthState>(
+      body: BlocConsumer<ForgetPasswordCubit, ForgetPasswordState>(
         listener: (context, state) {
-          if (state is AuthForgetPasswordSuccess) {
+          if (state is ForgetPasswordSuccess) {
             Navigator.pushNamed(context, ResetPasswordOtp.routeName);
-          } else if (state is AuthError) {
+          } else if (state is ForgetPasswordFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -65,7 +64,7 @@ class ForgetPasswordViewBody extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: screenHeight * 0.02),
-                  state is AuthLoading
+                  state is ForgetPasswordLoading
                       ? const CircularProgressIndicator()
                       : CustomButton(
                           onPressed: () {

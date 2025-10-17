@@ -21,13 +21,16 @@ class AuthRepoImpl implements AuthRepo {
     try {
       final response = await dio.post(
         ApiEndPoint.login,
-          data: {'phone': phone, 'password': password},
+        data: {'phone': phone, 'password': password},
       );
       return Right(UserModel.fromJson(response));
+    } on DioException catch (e) {
+      // ✅ استخدم الهاندلر المخصص لأخطاء Dio
+      handleDioExceptions(e);
+      rethrow; // هيتم تحويله لـ ServerException في الكيوبت
     } catch (e) {
-      return Left(
-        ServerException(errorModel: ErrorModel(message: 'Login failed')),
-      );
+      return Left(ServerException(
+          errorModel: ErrorModel(message: 'Unexpected login error')));
     }
   }
 
@@ -48,35 +51,33 @@ class AuthRepoImpl implements AuthRepo {
           'password': password,
         },
       );
-      if (response['userId'] != null) {
-        return Right(UserModel.fromJson(response));
-      } else {
-        final errorMessage = response['message'] ?? 'Signup failed';
-        return Left(
-          ServerException(errorModel: ErrorModel(message: errorMessage)),
-        );
-      }
+
+      return Right(UserModel.fromJson(response));
+    } on DioException catch (e) {
+      handleDioExceptions(e);
+      rethrow;
     } catch (e) {
-      return Left(
-        ServerException(errorModel: ErrorModel(message: 'Signup failed')),
-      );
+      return Left(ServerException(
+          errorModel: ErrorModel(message: 'Unexpected signup error')));
     }
   }
 
   @override
-  Future<Either<ServerException, OtpResponse>> sendOtp({
-    required String code,
+  Future<Either<ServerException, OtpResponse>> resendOtp({
+    required String phone,
   }) async {
     try {
       final response = await dio.post(
         ApiEndPoint.sendOtp,
-        data: {'code': code},
+        data: {'phone': phone},
       );
-      return Right(OtpResponse.fromJson(response.data));
+      return Right(OtpResponse.fromJson(response));
+    } on DioException catch (e) {
+      handleDioExceptions(e);
+      rethrow;
     } catch (e) {
-      return Left(
-        ServerException(errorModel: ErrorModel(message: 'Send OTP failed')),
-      );
+      return Left(ServerException(
+          errorModel: ErrorModel(message: 'Unexpected send OTP error')));
     }
   }
 
@@ -91,10 +92,12 @@ class AuthRepoImpl implements AuthRepo {
         data: {'phone': phone, 'code': code},
       );
       return Right(OtpResponse.fromJson(response));
+    } on DioException catch (e) {
+      handleDioExceptions(e);
+      rethrow;
     } catch (e) {
-      return Left(
-        ServerException(errorModel: ErrorModel(message: 'Verify OTP failed')),
-      );
+      return Left(ServerException(
+          errorModel: ErrorModel(message: 'Unexpected verify OTP error')));
     }
   }
 
@@ -109,12 +112,12 @@ class AuthRepoImpl implements AuthRepo {
         data: {'phone': phone, 'newPassword': newPassword},
       );
       return const Right(null);
+    } on DioException catch (e) {
+      handleDioExceptions(e);
+      rethrow;
     } catch (e) {
-      return Left(
-        ServerException(
-          errorModel: ErrorModel(message: 'Reset Password failed'),
-        ),
-      );
+      return Left(ServerException(
+          errorModel: ErrorModel(message: 'Unexpected reset password error')));
     }
   }
 
@@ -125,12 +128,12 @@ class AuthRepoImpl implements AuthRepo {
     try {
       await dio.post(ApiEndPoint.forgetPassword, data: {'phone': phone});
       return const Right(null);
+    } on DioException catch (e) {
+      handleDioExceptions(e);
+      rethrow;
     } catch (e) {
-      return Left(
-        ServerException(
-          errorModel: ErrorModel(message: 'Forget Password failed'),
-        ),
-      );
+      return Left(ServerException(
+          errorModel: ErrorModel(message: 'Unexpected forget password error')));
     }
   }
 }
